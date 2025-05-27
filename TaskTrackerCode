@@ -1,0 +1,127 @@
+from datetime import datetime
+import random
+import json
+import os
+
+#Global variable to hold the task list and statuses
+taskList = []
+statuses = ["todo", "in-progress", "done"]
+file_path = 'TaskCLI.json'
+
+print("Welcome to Task Tracker CLI")
+
+# Main function to start the CLI
+def main():
+    startInput = input('Enter add, delete, update, list or mark to start: ').strip().lower()
+
+    if startInput == 'add':
+        addTask()
+    elif startInput == 'delete':
+        deleteTask()
+    elif startInput == 'update':
+        updateTask()
+    elif startInput == 'list':
+        listTasks()
+    elif startInput == 'mark':
+        markTask()
+    else:
+        exit(1)
+
+# Definition to add a task
+def addTask():
+   taskID = random.randint(1000, 9999)
+   description = input("Enter task description: ")
+   status = input("Enter task status (todo, in-progress, done): ").strip().lower()
+   if status not in statuses:   
+       print("Invalid status. Please enter one of the following: todo, in-progress, done.")
+       return
+   createdAt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+   taskList.append({
+       "taskID": taskID,
+       "description": description,
+       "status": status,
+       "createdAt": createdAt
+   })
+
+   with open("TaskCLI.json", "w") as file:
+    json.dump(taskList, file, indent=4)
+   print("Task Added Successfully")
+   main()
+
+# Definition to delete a task
+def deleteTask(id_to_delete):
+    deleteID = input("Enter task ID to delete: ")
+
+    try:
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+        return
+    except json.JSONDecodeError:
+         print(f"Error: Invalid JSON format in {file_path}")
+         return
+
+
+    if id_to_delete in 'TaskCLI.json':
+        del data[deleteID]
+        with open("TaskCLI.json", "w") as file:
+            json.dump(taskList, file, indent=4)
+        print("Task Deleted Successfully")
+    else:
+        print("Task ID not found.")
+    main()
+
+# Definition to update a task
+def updateTask():
+    taskID = random.randint(1000, 9999)
+    description = input("Enter new task description: ")
+    status = input("Enter task status (todo, in-progress, done): ").strip().lower()
+    if status not in statuses:   
+       print("Invalid status. Please enter one of the following: todo, in-progress, done.")
+       return
+    createdAt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    taskList.append({
+       "taskID": taskID,
+       "description": description,
+       "status": status,
+       "createdAt": createdAt
+    })
+    with open("TaskCLI.json", "w") as file:
+        json.dump(taskList, file, indent=4)
+    print("Task Updated Successfully")
+    main()
+
+# Definition to mark a task as done, todo, or in-progress
+def markTask():
+    taskIDCheck = input("Enter task ID to mark: ")
+    mark = input(f"What would you like to mark task {taskIDCheck} as? (todo, in-progress, done): ").strip().lower()
+    if mark not in statuses:   
+       print("Invalid status. Please enter one of the following: todo, in-progress, done.")
+       return
+    for task in taskList:
+        if task["taskID"] == int(taskIDCheck):
+            task["status"] = "done"
+            task["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            break
+    else:
+        print("Task ID not found.")
+        return
+    with open("TaskCLI.json", "w") as file:
+        json.dump(taskList, file, indent=4)
+    print("Task Marked Successfully")    
+    main()
+
+# Definition to list all tasks
+def listTasks():
+    print("Listing all tasks...")
+    with open("TaskCLI.json", "w") as file:
+        json.dump(taskList, file, indent=4)
+
+    # Pretty-print to console directly from the object
+    print(json.dumps(taskList, indent=4))
+    main()
+
+
+
+main()
